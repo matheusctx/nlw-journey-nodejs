@@ -33,12 +33,21 @@ export async function createInvite(app: FastifyInstance) {
         throw new ClientError('Trip not found')
       }
 
-      const participant = await prisma.participant.create({
-        data: {
+      let participant = await prisma.participant.findFirst({
+        where: {
           email,
-          trip_id: tripId,
+          trip_id: tripId
         }
       })
+
+      if (!participant) {
+        participant = await prisma.participant.create({
+          data: {
+            email,
+            trip_id: tripId,
+          }
+        })
+      }
 
       const formattedStartDate = dayjs(trip.starts_at).format('LL')
       const formattedEndDate = dayjs(trip.ends_at).format('LL')
